@@ -4,9 +4,11 @@ import torch
 from transformers import AutoModelForImageClassification, AutoImageProcessor
 from io import BytesIO
 import requests
+from flask_cors import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
 # Load the processor and model
 processor = AutoImageProcessor.from_pretrained("processor_directory")  # Local saved processor

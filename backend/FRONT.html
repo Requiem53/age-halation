@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Classifier API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary-color: #f72585;
+            --text-color: #2b2d42;
+            --light-text: #555b6e;
+            --background: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-radius: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url("https://wallpapercave.com/wp/wp1872742.jpg");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 2.5rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: block;
+            width: 100%;
+        }
+
+        .file-input-label {
+            background-color: #f0f0f0;
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: block;
+            text-align: center;
+            cursor: pointer;
+            border: 2px dashed #ccc;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
+            background-color: #e0e0e0;
+            border-color: #aaa;
+        }
+
+        .file-input-label.has-file {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .file-input-container input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: var(--transition);
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        #prediction {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            margin-top: 30px;
+            font-weight: 600;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background-color: rgba(67, 97, 238, 0.1);
+            display: none;
+        }
+
+        #prediction.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error {
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        .preview-container {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .preview-title {
+            font-size: 1rem;
+            color: var(--light-text);
+            margin-bottom: 15px;
+            display: none;
+            font-weight: 500;
+        }
+
+        video, canvas, #imagePreview {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            display: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid var(--primary-color);
+        }
+
+        .processing {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .processing:after {
+            content: " ";
+            display: block;
+            border-radius: 50%;
+            width: 0;
+            height: 0;
+            margin: 8px;
+            box-sizing: border-box;
+            border: 32px solid var(--primary-color);
+            border-color: var(--primary-color) transparent var(--primary-color) transparent;
+            animation: processing 1.2s infinite;
+        }
+
+        @keyframes processing {
+            0% {
+                transform: rotate(0);
+                animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+            }
+            50% {
+                transform: rotate(180deg);
+                animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Age Halation</h1>
+        <form id="urlForm" enctype="multipart/form-data">
+            <div class="input-group">
+                <label class="input-label" for="imageUrl">Image URL:</label>
+                <input type="text" id="imageUrl" name="image_url" placeholder="Enter image URL" />
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label" for="imageFile">Upload Image:</label>
+                <div class="file-input-container">
+                    <label id="fileInputLabel" class="file-input-label">
+                        Choose an image file or drag and drop here
+                    </label>
+                    <input type="file" id="imageFile" name="image" accept="image/*" />
+                </div>
+            </div>
+            
+            <div class="preview-container">
+                <p id="previewTitle" class="preview-title">Image Preview:</p>
+                <img id="imagePreview" alt="Preview" />
+            </div>
+            
+            <div class="btn-container">
+                <button type="submit" class="btn">Predict Age</button>
+                <button type="button" id="openCamera" class="btn">Open Camera</button>
+                <button type="button" id="captureImage" class="btn" style="display: none;">Capture Image</button>
+            </div>
+        </form>
+        <video id="video" autoplay></video>
+        <canvas id="canvas" style="display: none;"></canvas>
+        <div id="prediction"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const openCameraBtn = document.getElementById('openCamera');
+        const captureImageBtn = document.getElementById('captureImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewTitle = document.getElementById('previewTitle');
+        const fileInput = document.getElementById('imageFile');
+        const fileInputLabel = document.getElementById('fileInputLabel');
+        const imageUrlInput = document.getElementById('imageUrl');
+        let stream = null;
+
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    video.style.display = 'none';
+                    canvas.style.display = 'none';
+                    
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    previewTitle.style.display = 'block';
+                    
+                    fileInputLabel.textContent = file.name;
+                    fileInputLabel.classList.add('has-file');
+                    
+                    imageUrlInput.value = '';
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+                previewTitle.style.display = 'none';
+                fileInputLabel.textContent = 'Choose an image file or drag and drop here';
+                fileInputLabel.classList.remove('has-file');
+            }
+        });
+
+        imageUrlInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                fileInput.value = '';
+                fileInputLabel.textContent = 'Choose an image file or drag and drop here';
+                fileInputLabel.classList.remove('has-file');
+                
+                video.style.display = 'none';
+                canvas.style.display = 'none';
+                
+                imagePreview.src = url;
+                imagePreview.style.display = 'block';
+                previewTitle.style.display = 'block';
+                
+                imagePreview.onerror = function() {
+                    imagePreview.style.display = 'none';
+                    previewTitle.style.display = 'none';
+                };
+            } else {
+                imagePreview.style.display = 'none';
+                previewTitle.style.display = 'none';
+            }
+        });
+
+        // Open camera
+        openCameraBtn.addEventListener('click', async () => {
+            try {
+                imageUrlInput.value = '';
+                fileInput.value = '';
+                fileInputLabel.textContent = 'Choose an image file or drag and drop here';
+                fileInputLabel.classList.remove('has-file');
+                imagePreview.style.display = 'none';
+                previewTitle.style.display = 'none';
+                
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                captureImageBtn.style.display = 'block';
+                openCameraBtn.style.display = 'none';
+            } catch (error) {
+                document.getElementById('prediction').innerHTML = `<span class="error">Error accessing camera: ${error.message}</span>`;
+                document.getElementById('prediction').classList.add('active');
+            }
+        });
+
+        captureImageBtn.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.style.display = 'block';
+            video.style.display = 'none';
+            captureImageBtn.style.display = 'none';
+            openCameraBtn.style.display = 'block';
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        });
+
+        document.getElementById('urlForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const imageUrl = document.getElementById('imageUrl').value;
+            const imageFile = document.getElementById('imageFile').files[0];
+            const predictionDiv = document.getElementById('prediction');
+            predictionDiv.innerHTML = 'Processing...';
+            predictionDiv.classList.add('active');
+
+            try {
+                let response;
+                if (imageUrl) {
+                    response = await fetch('http://127.0.0.1:5000/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ image_url: imageUrl }),
+                    });
+                } else if (imageFile) {
+                    const formData = new FormData();
+                    formData.append('image', imageFile);
+                    response = await fetch('http://127.0.0.1:5000/predict', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                } else if (canvas.style.display === 'block') {
+                    const formData = new FormData();
+                    canvas.toBlob(blob => {
+                        formData.append('image', blob, 'captured_image.jpg');
+                        fetch('http://127.0.0.1:5000/predict', {
+                            method: 'POST',
+                            body: formData,
+                        }).then(res => {
+                            if (!res.ok) {
+                                return res.json().then(errorData => {
+                                    throw new Error(`HTTP error! Status: ${res.status}, Message: ${errorData.error || 'Unknown error'}`);
+                                });
+                            }
+                            return res.json();
+                        }).then(result => {
+                            predictionDiv.innerHTML = `Predicted Age Range: ${result.predicted_label}`;
+                        }).catch(error => {
+                            console.error('Fetch error:', error);
+                            predictionDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+                        });
+                    }, 'image/jpeg');
+                    return;
+                } else {
+                    predictionDiv.innerHTML = '<span class="error">Please provide an image URL, upload an image file, or capture an image.</span>';
+                    return;
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorData.error || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+                predictionDiv.innerHTML = `Predicted Age Range: ${result.predicted_label}`;
+            } catch (error) {
+                console.error('Fetch error:', error);
+                predictionDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        });
+    </script>
+</body>
+</html>
